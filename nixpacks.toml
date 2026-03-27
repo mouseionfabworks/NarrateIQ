@@ -1,0 +1,11 @@
+﻿[phases.setup]
+cmds = ["cd api"]
+
+[phases.install]
+cmds = ["cd api && npm ci"]
+
+[phases.build]
+cmds = []
+
+[start]
+cmd = "cd api && node server.js"
