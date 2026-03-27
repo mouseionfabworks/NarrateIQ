@@ -25,3 +25,19 @@ app.use(session({
   },
 }));
 
+// Health check FIRST (before static files)
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve admin static files
+app.use('/admin', express.static(path.join(__dirname, 'public', 'admin')));
+
+// Admin API routes
+app.use('/admin', adminRouter);
+
+// Start server - CRITICAL: Bind to 0.0.0.0 for Railway
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`NarrateIQ API running on port ${PORT}`);
+});
