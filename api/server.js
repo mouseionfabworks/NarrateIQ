@@ -9,8 +9,8 @@ const adminRouter = require('./routes/admin');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN || '*', credentials: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,15 +25,3 @@ app.use(session({
   },
 }));
 
-// Serve admin static files
-app.use('/admin', express.static(path.join(__dirname, 'public', 'admin')));
-
-// Admin API routes
-app.use('/admin', adminRouter);
-
-// Health check
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
-
-app.listen(PORT, () => {
-  console.log(`NarrateIQ API running on port ${PORT}`);
-});
