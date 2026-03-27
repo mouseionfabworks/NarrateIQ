@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="NarrateIQ — Voice-first AI documentation assistant for property insurance adjusters. Turn field notes into carrier-ready claim narratives in seconds.">
+<title>NarrateIQ — Built for Adjusters</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0f1923;
+    --card: #1a2737;
+    --accent: #2563eb;
+    --accent-light: #3b82f6;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #475569;
+    --success: #22c55e;
+    --border: rgba(255,255,255,0.07);
+    --border-accent: rgba(37,99,235,0.4);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--navy);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .glow {
+    position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 500px; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at center, rgba(37,99,235,0.12) 0%, transparent 70%);
+  }
+  .container { max-width: 680px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  nav { padding: 28px 0 0; display: flex; align-items: center; justify-content: space-between; }
+  .logo {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+    letter-spacing: -0.02em; color: var(--text-primary); text-decoration: none;
+  }
+  .logo span { color: var(--accent-light); }
+  .badge {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--accent-light);
+    background: rgba(37,99,235,0.15); border: 1px solid var(--border-accent);
+    padding: 4px 10px; border-radius: 100px; letter-spacing: 0.05em;
+  }
+  .hero { padding: 80px 0 60px; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent-light);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 24px;
+    opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(42px, 8vw, 64px); line-height: 1.0;
+    letter-spacing: -0.03em; color: var(--text-primary); margin-bottom: 28px;
+    opacity: 0; animation: fadeUp 0.6s ease forwards 0.2s;
+  }
+  h1 .highlight { color: var(--accent-light); }
+  .subhead {
+    font-size: 18px; color: var(--text-secondary); line-height: 1.6;
+    max-width: 540px; margin-bottom: 48px;
+    opacity: 0; animation: fadeUp 0.6s ease forwards 0.3s;
+  }
+  .subhead strong { color: var(--text-primary); font-weight: 500; }
+  .form-wrap { opacity: 0; animation: fadeUp 0.6s ease forwards 0.4s; }
+  .input-row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .input-row input {
+    flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 18px; font-size: 15px; color: var(--text-primary);
+    font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s, background 0.2s;
+  }
+  .input-row input::placeholder { color: var(--text-muted); }
+  .input-row input:focus { border-color: var(--accent); background: rgba(37,99,235,0.08); }
+  .btn-join {
+    background: var(--accent); color: #fff; border: none; border-radius: 10px;
+    padding: 14px 28px; font-size: 15px; font-weight: 500; font-family: 'Inter', sans-serif;
+    cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.1s;
+  }
+  .btn-join:hover { background: var(--accent-light); }
+  .btn-join:active { transform: scale(0.98); }
+  .form-note { font-size: 13px; color: var(--text-muted); }
+  .success-msg {
+    display: none; align-items: center; gap: 10px;
+    background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25);
+    border-radius: 10px; padding: 14px 18px; font-size: 15px; color: #4ade80;
+  }
+  .success-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+  .divider { height: 1px; background: var(--border); margin: 60px 0; }
+  .value-stack { display: flex; flex-direction: column; gap: 2px; margin-bottom: 60px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.5s; }
+  .value-item {
+    display: flex; align-items: flex-start; gap: 20px; padding: 22px 24px;
+    border-radius: 12px; border: 1px solid transparent; transition: border-color 0.2s, background 0.2s; cursor: default;
+  }
+  .value-item:hover { background: rgba(255,255,255,0.03); border-color: var(--border); }
+  .value-num { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent-light); opacity: 0.6; padding-top: 3px; flex-shrink: 0; width: 20px; }
+  .value-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.01em; }
+  .value-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+  .quote-block { border-left: 2px solid var(--accent); padding: 20px 28px; margin: 0 0 60px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.6s; }
+  .quote-text { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 400; color: var(--text-primary); line-height: 1.5; margin-bottom: 12px; font-style: italic; }
+  .quote-attr { font-size: 13px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 60px; opacity: 0; animation: fadeUp 0.6s ease forwards 0.55s; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+  .stat-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: var(--text-primary); letter-spacing: -0.02em; display: block; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text-secondary); line-height: 1.3; }
+  footer { padding: 40px 0; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-muted); }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--text-secondary); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 500px) { .input-row { flex-direction: column; } .stat-row { grid-template-columns: 1fr; } h1 { font-size: 40px; } }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="container">
+  <nav>
+    <a class="logo" href="#">Narrate<span>IQ</span></a>
+    <span class="badge">BETA — COMING SOON</span>
+  </nav>
+  <section class="hero">
+    <p class="eyebrow">For property adjusters</p>
+    <h1>Your notes.<br><span class="highlight">Your time machine.</span></h1>
+    <p class="subhead">
+      Speak your field observations. NarrateIQ turns them into <strong>carrier-ready claim narratives</strong> — and coaches you on what to document better next time.
+    </p>
+    <div class="form-wrap">
+      <div class="input-row">
+        <input type="email" id="email-input" placeholder="your@email.com" />
+        <button class="btn-join" onclick="handleJoin()">Join waitlist</button>
+      </div>
+      <p class="form-note">Beta is free. No credit card. No spam.</p>
+      <div class="success-msg" id="success-msg">
+        <div class="success-dot"></div>
+        You're on the list. We'll be in touch before launch.
+      </div>
+    </div>
+  </section>
+  <div class="divider"></div>
+  <div class="value-stack">
+    <div class="value-item">
+      <span class="value-num">01</span>
+      <div class="value-content">
+        <div class="value-title">Speak it. Done.</div>
+        <div class="value-desc">Hold a button, describe what you saw. NarrateIQ writes the professional narrative. No templates, no typing, no struggling for the right words at the end of a long CAT day.</div>
+      </div>
+    </div>
+    <div class="value-item">
+      <span class="value-num">02</span>
+      <div class="value-content">
+        <div class="value-title">Nothing gets missed.</div>
+        <div class="value-desc">The AI checks your notes against claim type documentation frameworks — water, wind, hail, general loss — and surfaces exactly what's missing before you generate.</div>
+      </div>
+    </div>
+    <div class="value-item">
+      <span class="value-num">03</span>
+      <div class="value-content">
+        <div class="value-title">Get better every claim.</div>
+        <div class="value-desc">After each narrative, NarrateIQ shows you why it asked what it asked, what gaps it found, and what to document more specifically next time. The mentor on every inspection.</div>
+      </div>
+    </div>
+  </div>
+  <div class="quote-block">
+    <p class="quote-text">"Hey — you've gotta try this. Saves me time, I get better notes, and it even teaches me how to address my observations next time."</p>
+    <p class="quote-attr">— What I expect you'll say after trying it.</p>
+  </div>
+  <div class="stat-row">
+    <div class="stat-card">
+      <span class="stat-num">&#8734;</span>
+      <span class="stat-label">property claim types supported</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num">~60s</span>
+      <span class="stat-label">voice to full narrative</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num">20+</span>
+      <span class="stat-label">yrs adjuster expertise baked in</span>
+    </div>
+  </div>
+  <footer>
+    <span>© 2026 Mouseion Fab Works</span>
+    <a href="mailto:info@narrateiq.ai">info@narrateiq.ai</a>
+  </footer>
+</div>
+<script>
+  function handleJoin() {
+    const input = document.getElementById('email-input');
+    const msg = document.getElementById('success-msg');
+    const row = input.closest('.input-row');
+    const note = row.nextElementSibling;
+    const val = input.value.trim();
+    if (!val || !val.includes('@')) {
+      input.style.borderColor = '#ef4444';
+      setTimeout(() => input.style.borderColor = '', 1200);
+      return;
+    }
+    window.location.href = 'mailto:info@narrateiq.ai?subject=NarrateIQ%20Waitlist&body=Please%20add%20me%20to%20the%20waitlist%3A%20' + encodeURIComponent(val);
+    row.style.display = 'none';
+    if (note) note.style.display = 'none';
+    msg.style.display = 'flex';
+  }
+</script>
+</body>
+</html>

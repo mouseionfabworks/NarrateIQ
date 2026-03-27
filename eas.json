@@ -1,0 +1,26 @@
+{
+  "cli": {
+    "version": ">= 18.4.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://api.narrateiq.ai",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://bywrgsowxcpkqtgbqecj.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5d3Jnc293eGNwa3F0Z2JxZWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODA2OTIsImV4cCI6MjA4OTg1NjY5Mn0.fGU8zTSncyFEUcpO_9JAgnLqGSzMBp2k1cmvvn-wrrM"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

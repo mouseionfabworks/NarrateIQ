@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NarrateIQ Admin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3a;
+    --accent: #6c63ff;
+    --accent-hover: #5a52d5;
+    --danger: #e05260;
+    --success: #4caf8a;
+    --text: #e2e4ed;
+    --muted: #7b7f96;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── Login ─────────────────────────────────────────── */
+  #login-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px 48px;
+    width: 360px;
+    text-align: center;
+  }
+  .login-box h1 { font-size: 22px; margin-bottom: 6px; }
+  .login-box p { color: var(--muted); margin-bottom: 28px; font-size: 13px; }
+  .login-box input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--accent); }
+  #login-error { color: var(--danger); font-size: 12px; min-height: 18px; margin-bottom: 10px; }
+
+  /* ── Layout ────────────────────────────────────────── */
+  #app-view { display: none; }
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+  }
+  .sidebar-logo {
+    padding: 0 20px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .sidebar-logo span { color: var(--accent); }
+  .nav-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    color: var(--muted);
+    border-left: 3px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { color: var(--text); }
+  .nav-item.active { color: var(--text); border-left-color: var(--accent); background: rgba(108,99,255,0.08); }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 20px;
+  }
+
+  .main { margin-left: 220px; padding: 32px 36px; flex: 1; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  h2 { font-size: 20px; margin-bottom: 20px; }
+
+  /* ── Buttons ───────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-danger { background: rgba(224,82,96,0.15); color: var(--danger); border: 1px solid rgba(224,82,96,0.3); }
+  .btn-danger:hover { background: rgba(224,82,96,0.25); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── Table ─────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid rgba(42,45,58,0.6); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── Badges ────────────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-active { background: rgba(76,175,138,0.15); color: var(--success); }
+  .badge-inactive { background: rgba(224,82,96,0.12); color: var(--danger); }
+  .badge-used { background: rgba(123,127,150,0.15); color: var(--muted); }
+
+  /* ── Cards (token totals) ──────────────────────────── */
+  .stat-grid { display: flex; gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    flex: 1;
+  }
+  .stat-card .label { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+  .stat-card .value { font-size: 26px; font-weight: 700; }
+
+  /* ── Toolbar ───────────────────────────────────────── */
+  .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+
+  /* ── Loading / empty ───────────────────────────────── */
+  .loading { color: var(--muted); padding: 24px 0; }
+  .empty { color: var(--muted); padding: 24px 14px; }
+</style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="login-view">
+  <div class="login-box">
+    <h1>NarrateIQ</h1>
+    <p>Admin Dashboard</p>
+    <input type="password" id="password-input" placeholder="Admin password" autocomplete="current-password" />
+    <div id="login-error"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<!-- ── App ── -->
+<div id="app-view">
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">Narrate<span>IQ</span></div>
+      <div class="nav-item active" data-panel="codes">Access Codes</div>
+      <div class="nav-item" data-panel="users">Beta Users</div>
+      <div class="nav-item" data-panel="usage">Usage</div>
+      <div class="nav-item" data-panel="tokens">Tokens / Cost</div>
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost" style="width:100%" onclick="doLogout()">Sign out</button>
+      </div>
+    </nav>
+
+    <main class="main">
+
+      <!-- Access Codes -->
+      <div class="panel active" id="panel-codes">
+        <h2>Access Codes</h2>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="generateCode()">+ Generate Code</button>
+          <button class="btn btn-ghost" onclick="loadCodes()">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Used by</th>
+                <th>Used at</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="codes-tbody">
+              <tr><td colspan="6" class="loading">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Beta Users -->
+      <div class="panel" id="panel-users">
+        <h2>Beta Users</h2>
+        <div class="toolbar">
+          <button class="btn btn-ghost" onclick="loadUsers()">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Registered</th>
+                <th>Last active</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr><td colspan="3" class="loading">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Usage -->
+      <div class="panel" id="panel-usage">
+        <h2>Usage</h2>
+        <div class="toolbar">
+          <button class="btn btn-ghost" onclick="loadUsage()">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Narratives</th>
+                <th>Ready</th>
+                <th>Needed Edits</th>
+                <th>Not Usable</th>
+              </tr>
+            </thead>
+            <tbody id="usage-tbody">
+              <tr><td colspan="5" class="loading">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tokens / Cost -->
+      <div class="panel" id="panel-tokens">
+        <h2>Tokens / Cost</h2>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="label">Total Input Tokens</div>
+            <div class="value" id="total-in">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Total Output Tokens</div>
+            <div class="value" id="total-out">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Estimated Cost (USD)</div>
+            <div class="value" id="total-cost">—</div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-ghost" onclick="loadTokens()">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Input Tokens</th>
+                <th>Output Tokens</th>
+                <th>Cost (USD)</th>
+              </tr>
+            </thead>
+            <tbody id="tokens-tbody">
+              <tr><td colspan="4" class="loading">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+const BASE = '';
+
+async function api(path, opts = {}) {
+  const res = await fetch(BASE + path, {
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if (res.status === 401) {
+    showLogin();
+    throw new Error('Unauthenticated');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || res.statusText);
+  }
+  return res.json();
+}
+
+function fmt(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function fmtNum(n) {
+  return Number(n).toLocaleString();
+}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+
+async function init() {
+  try {
+    const { authed } = await api('/admin/me');
+    if (authed) showApp();
+    else showLogin();
+  } catch {
+    showLogin();
+  }
+}
+
+function showLogin() {
+  document.getElementById('login-view').style.display = 'flex';
+  document.getElementById('app-view').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('login-view').style.display = 'none';
+  document.getElementById('app-view').style.display = 'block';
+  loadCodes();
+}
+
+async function doLogin() {
+  const pw = document.getElementById('password-input').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  try {
+    await api('/admin/login', { method: 'POST', body: { password: pw } });
+    showApp();
+  } catch (e) {
+    errEl.textContent = e.message || 'Login failed';
+  }
+}
+
+async function doLogout() {
+  await api('/admin/logout').catch(() => {});
+  showLogin();
+}
+
+document.getElementById('password-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+
+const loaders = { codes: loadCodes, users: loadUsers, usage: loadUsage, tokens: loadTokens };
+
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const id = el.dataset.panel;
+    document.getElementById('panel-' + id).classList.add('active');
+    if (loaders[id]) loaders[id]();
+  });
+});
+
+// ── Access Codes ──────────────────────────────────────────────────────────────
+
+async function loadCodes() {
+  const tbody = document.getElementById('codes-tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">Loading…</td></tr>';
+  try {
+    const codes = await api('/admin/codes');
+    if (!codes.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">No codes yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = codes.map(c => `
+      <tr>
+        <td><code style="font-size:13px;letter-spacing:1px">${c.code}</code></td>
+        <td>${fmt(c.created_at)}</td>
+        <td>${statusBadge(c)}</td>
+        <td>${c.used_by ? `<code style="font-size:11px">${c.used_by.slice(0,8)}…</code>` : '—'}</td>
+        <td>${fmt(c.used_at)}</td>
+        <td>${c.is_active ? `<button class="btn btn-danger" onclick="revokeCode('${c.id}')">Revoke</button>` : ''}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="color:var(--danger)">${e.message}</td></tr>`;
+  }
+}
+
+function statusBadge(c) {
+  if (!c.is_active) return '<span class="badge badge-inactive">Revoked</span>';
+  if (c.used_by)    return '<span class="badge badge-used">Used</span>';
+  return '<span class="badge badge-active">Active</span>';
+}
+
+async function generateCode() {
+  try {
+    await api('/admin/codes/generate', { method: 'POST', body: {} });
+    loadCodes();
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+async function revokeCode(id) {
+  if (!confirm('Revoke this code? This cannot be undone.')) return;
+  try {
+    await api('/admin/codes/revoke', { method: 'POST', body: { id } });
+    loadCodes();
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+// ── Beta Users ────────────────────────────────────────────────────────────────
+
+async function loadUsers() {
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = '<tr><td colspan="3" class="loading">Loading…</td></tr>';
+  try {
+    const users = await api('/admin/users');
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty">No users yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.email || '—'}</td>
+        <td>${fmt(u.created_at)}</td>
+        <td>${fmt(u.last_active)}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--danger)">${e.message}</td></tr>`;
+  }
+}
+
+// ── Usage ─────────────────────────────────────────────────────────────────────
+
+async function loadUsage() {
+  const tbody = document.getElementById('usage-tbody');
+  tbody.innerHTML = '<tr><td colspan="5" class="loading">Loading…</td></tr>';
+  try {
+    const rows = await api('/admin/usage');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">No usage data yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><code style="font-size:11px">${r.user_id.slice(0,12)}…</code></td>
+        <td>${r.total}</td>
+        <td>${r.ready}</td>
+        <td>${r.needed_edits}</td>
+        <td>${r.not_usable}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">${e.message}</td></tr>`;
+  }
+}
+
+// ── Tokens ────────────────────────────────────────────────────────────────────
+
+async function loadTokens() {
+  const tbody = document.getElementById('tokens-tbody');
+  tbody.innerHTML = '<tr><td colspan="4" class="loading">Loading…</td></tr>';
+  try {
+    const { rows, totals } = await api('/admin/tokens');
+    document.getElementById('total-in').textContent   = fmtNum(totals.tokens_in);
+    document.getElementById('total-out').textContent  = fmtNum(totals.tokens_out);
+    document.getElementById('total-cost').textContent = '$' + totals.cost_usd.toFixed(4);
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">No token data yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><code style="font-size:11px">${r.user_id.slice(0,12)}…</code></td>
+        <td>${fmtNum(r.tokens_in)}</td>
+        <td>${fmtNum(r.tokens_out)}</td>
+        <td>$${r.cost_usd.toFixed(4)}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--danger)">${e.message}</td></tr>`;
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
